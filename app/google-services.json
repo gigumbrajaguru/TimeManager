@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "114843232801",
+    "firebase_url": "https://timemanager-c1583.firebaseio.com",
+    "project_id": "timemanager-c1583",
+    "storage_bucket": "timemanager-c1583.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:114843232801:android:b53f754a5c61f6ba",
+        "android_client_info": {
+          "package_name": "itpdm.timemanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "114843232801-i1e56d4v522jeqrjo0lg8ishmlg8mdsc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "itpdm.timemanager",
+            "certificate_hash": "11034a48179c18668aaca855ca6d07e62043c087"
+          }
+        },
+        {
+          "client_id": "114843232801-74ctki0hnju05o9hcb22iuq17qkqbbtr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyoW_QAGC6W6l3XFeeB2ey5LoPhLvJOfQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "114843232801-74ctki0hnju05o9hcb22iuq17qkqbbtr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

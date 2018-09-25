@@ -19,6 +19,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".Tasks">
+        </activity>
+        <activity android:name=".Notification">
+        </activity>
+        <activity android:name=".Profile">
+        </activity>
     </application>
 
 </manifest>
