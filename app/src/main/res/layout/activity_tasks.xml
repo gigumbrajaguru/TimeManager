@@ -9,6 +9,7 @@
     tools:context=".MainActivity$PlaceholderFragment">
 
     <ListView
+        android:id="@+id/lists"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="3dp"
@@ -19,4 +20,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
+
 </android.support.constraint.ConstraintLayout>

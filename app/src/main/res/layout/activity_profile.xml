@@ -66,7 +66,7 @@
 
     <Button
         android:id="@+id/updateprofilebtn"
-        android:layout_width="193dp"
+        android:layout_width="330dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="96dp"
         android:layout_marginStart="96dp"
@@ -78,7 +78,7 @@
 
     <Button
         android:id="@+id/btndeleteaccount"
-        android:layout_width="191dp"
+        android:layout_width="330dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
