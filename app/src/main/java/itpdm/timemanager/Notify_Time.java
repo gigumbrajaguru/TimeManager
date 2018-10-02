@@ -8,19 +8,19 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class TaskTime extends ArrayAdapter<String> {
+public class Notify_Time extends ArrayAdapter<String> {
     private final Activity context;
-    private final String[] taskids;
-    private final String[]tasknames;
-    private final String[]tasktimes;
-    private final String[]status;
-    public TaskTime(Activity context, String[]taskname, String[]tasktime,String[] status,String[]taskid){
-        super(context, R.layout.task_time, taskname);
+    private final String[]notifyids;
+    private final String[]notify;
+    private final String[]notifytimes;
+    private final String[]notifystatus;
+    public Notify_Time(Activity context, String[]notifies, String[]notifytimes, String[] notifystatus, String[]notifyids){
+        super(context, R.layout.notify_time, notifies);
         this.context=context;
-        this.tasknames=taskname;
-        this.tasktimes=tasktime;
-        this.status=status;
-        this.taskids=taskid;
+        this.notify=notifies;
+        this.notifytimes=notifytimes;
+        this.notifystatus=notifystatus;
+        this.notifyids=notifyids;
     }
 
     public View getView(int position, View view, ViewGroup parent) {
@@ -31,11 +31,11 @@ public class TaskTime extends ArrayAdapter<String> {
         TextView tasktime =  v.findViewById(R.id.tasktime);
         ImageView holder    =v.findViewById(R.id.holder);
         taskid.setVisibility(TextView.INVISIBLE);
-        taskid.setText(taskids[position]);
-        taskname.setText(tasknames[position]);
-        tasktime.setText(tasktimes[position]);
-        if(status[position]=="true") {
-        taskname.setTextColor(16);
+        taskid.setText(notifyids[position]);
+        taskname.setText(notify[position]);
+        tasktime.setText(notifytimes[position]);
+        if(notifystatus[position]=="true") {
+            taskname.setTextColor(16);
         }
         holder.setVisibility(ImageView.INVISIBLE);
         return v;
