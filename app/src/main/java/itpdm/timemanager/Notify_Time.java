@@ -36,7 +36,7 @@ public class Notify_Time extends ArrayAdapter<String> {
         taskid.setText(notifyids[position]);
         taskname.setText(notify[position]);
         tasktime.setText(notifytimes[position]);
-        if(notifystatus[position]=="true") {
+        if(notifystatus[position]=="Critical") {
             taskname.setTextColor(Color.RED);
         }
         holder.setVisibility(ImageView.INVISIBLE);

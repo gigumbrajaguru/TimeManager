@@ -2,13 +2,17 @@ package itpdm.timemanager;
 
 
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class Tasks extends Fragment {
     int checkeddated[]=new int[3];
     int validationdates[]=new int[3];
-    String validated[]=new String[3];
+    String validates="",validates2="",validates3="";
     int validate=0;
     TaskTime addList;
     String email;
@@ -79,85 +83,143 @@ public class Tasks extends Fragment {
             tasknote.clear();
         }
     }
-    public String getDateAgo(String datesone) {
+    public String getDateAgo(String datesone,String time,String name,String email) {
         String join=null;
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy'T'HH:mm");
-        try {
-            Date dateone = sdf.parse(datesone);
-            Date now = new Date(System.currentTimeMillis());
-            validationdates = getDateDiff(dateone, now);
-            for(int x:validationdates) {
-                if (x > 0) {
-                    validate=1;
-                    join=join+String.valueOf(x)+"/";
-                } else {
+
+        String now = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
+            validationdates = getDateDiff(datesone, now);
+                if (validationdates[2] < 0) {
                     return "Date error";
+                } else if ((validationdates[2] > 0) && (validationdates[2] == 0) && (validationdates[1] < 0)) {
+                    return "Date error";
+                } else if ((validationdates[2] > 0) && (validationdates[2] == 0) && (validationdates[1] > 0) && (validationdates[1] == 0) && validationdates[2] < 0) {
+                    return "Date error";
+                } else {
+                    validate=1;
                 }
+        if(validate==1){
+            int totalday=validationdates[0]+validationdates[1]*30+validationdates[2]*365;
+            if(totalday==0) {
+                return timedifference(time,name);
             }
-            if(validate==1){
-
+            else{
+                return "After "+String.valueOf(totalday)+" days";
             }
-        } catch (Exception e) {
-
-            e.printStackTrace();
         }
         return "Errors in process";
     }
-    public String getDates(String datesone,String datetwo) {
+    public String getDates(String datesone,String datetwo,String timeone,String timetwo) {
         String join=null;
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy'T'HH:mm");
-        try {
-            Date dateone = sdf.parse(datesone);
-            Date datetwos = sdf.parse(datetwo);
-            validationdates = getDateDiff(dateone, datetwos);
-            for(int x:validationdates) {
-                if (x > 0) {
-                    validate=1;
-                    join=join+String.valueOf(x)+"/";
-                } else {
-                    return "Date error";
+            validationdates = getDateDiff(datesone, datetwo);
+        if (validationdates[2] < 0) {
+            return "Date error";
+        } else if ((validationdates[2] > 0) && (validationdates[2] == 0) && (validationdates[1] < 0)) {
+            return "Date error";
+        } else if ((validationdates[2] > 0) && (validationdates[2] == 0) && (validationdates[1] > 0) && (validationdates[1] == 0) && validationdates[2] < 0) {
+            return "Date error";
+        } else {
+            validate=1;
+        }
+            if(validate==1){
+                int totalday=validationdates[0]+validationdates[1]*30+validationdates[2]*365;
+                if(totalday==0) {
+                    return timedifferencetwo(timeone,timetwo);
+                }
+                else{
+                    return "After "+String.valueOf(totalday)+" days";
                 }
             }
-            if(validate==1){
 
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return "Errors in process";
     }
-    private int[] getDateDiff(Date date1, Date date2) {
+    public String timedifference(String time,String name){
+        String[] timedef=new String[2];
+        String[] timedef2=new String[2];
+        int outtime;
+        Date today = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("hh : mm");
+        String dateToStr = format.format(today);
+        timedef=dateToStr.split(" : ");
+        timedef2=time.split(" : ");
+        if(Integer.parseInt(timedef[0])<Integer.parseInt(timedef2[0])) {
+            outtime =Integer.parseInt(timedef2[0])-Integer.parseInt(timedef[0]);
+            validates=String.valueOf(outtime)+" hrs";
+        }
+        else if(timedef[0]==timedef2[0]){
+            outtime =Integer.parseInt(timedef2[1])-Integer.parseInt(timedef[1]);
+            validates2=String.valueOf(outtime)+" minutes";
+        }
+        else{
+            return "Expired";
+        }
+        addNotification(name,time,"Critical");
+        validates3=validates+" "+validates2;
+        return validates3;
+    }
+    public String timedifferencetwo(String time,String timetwo){
+        String[] timedef=new String[2];
+        String[] timedef2=new String[2];
+        int outtime;
+        timedef=timetwo.split(":");
+        timedef2=time.split(":");
+        if(Integer.parseInt(timedef[0])<Integer.parseInt(timedef2[0])) {
+            outtime =Integer.parseInt(timedef2[0])-Integer.parseInt(timedef[0]);
+        }
+        else if(timedef[0]==timedef2[0]){
+            outtime =Integer.parseInt(timedef2[1])-Integer.parseInt(timedef[1]);
+        }
+        else{
+            return "Expired";
+        }
 
-        String dayOfTheWeek = (String) DateFormat.format("EEEE", date1);
-        String day          = (String) DateFormat.format("dd",   date1);
-        String monthString  = (String) DateFormat.format("MMM",  date1);
-        String monthNumber  = (String) DateFormat.format("MM",   date1);
-        String year         = (String) DateFormat.format("yyyy", date1);
+        return String.valueOf(outtime);
+    }
 
-        int days1=Integer.parseInt(day);
-        int month1=Integer.parseInt(monthNumber);
-        int yeardate1=Integer.parseInt(year);
 
-        String dayOfTheWeek2 = (String) DateFormat.format("EEEE", date2);
-        String day2       = (String) DateFormat.format("dd",   date2);
-        String monthString2  = (String) DateFormat.format("MMM",  date2);
-        String monthNumber2  = (String) DateFormat.format("MM",   date2);
-        String year2         = (String) DateFormat.format("yyyy", date2);
+    private int[] getDateDiff(String  date1, String date2) {
 
-        int days2=Integer.parseInt(day2);
-        int month2=Integer.parseInt(monthNumber2);
-        int yeardate2=Integer.parseInt(year2);
+        String[] datesone=new String[3];
+        datesone=date1.split("/");
+        int days1=Integer.parseInt(datesone[0]);
+        int month1=Integer.parseInt(datesone[1]);
+        int yeardate1=Integer.parseInt(datesone[2]);
+        String[] datestwo=new String[3];
+        datestwo=date2.split("/");
+        int days2=Integer.parseInt(datestwo[0]);
+        int month2=Integer.parseInt(datestwo[1]);
+        int yeardate2=Integer.parseInt(datestwo[2]);
 
-         int checkday=days1-days2;
-         int checkmonth=month1-month2;
-         int checkyear=yeardate1-yeardate2;
-
+         int checkday=days2-days1;
+         int checkmonth=month2-month1;
+         int checkyear=yeardate2-yeardate1;
         checkeddated[0]=checkday;
         checkeddated[1]=checkmonth;
         checkeddated[2]=checkyear;
-
         return checkeddated;
     }
+    public void addNotification(final String name,final String time,final String status) {
+        mAuth = FirebaseAuth.getInstance();
+        final DatabaseReference mDatabases;
+        mDatabases = FirebaseDatabase.getInstance().getReference();
+        mDatabases.child("notifications").addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                        mDatabases.child("notifications").child(mAuth.getCurrentUser().getEmail().toString().split("@")[0]);
+                        mDatabases.child("notifications").child(mAuth.getCurrentUser().getEmail().toString().split("@")[0]).child("email").setValue(mAuth.getCurrentUser().getEmail().toString());
+                        mDatabases.child("notifications").child(mAuth.getCurrentUser().getEmail().toString().split("@")[0]).child("name").setValue(name);
+                        mDatabases.child("notifications").child(mAuth.getCurrentUser().getEmail().toString().split("@")[0]).child("time").setValue(time);
+                        mDatabases.child("notifications").child(mAuth.getCurrentUser().getEmail().toString().split("@")[0]).child("status").setValue(status);
+                }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
     public void setArrays(final View rootView) {
         mAuth = FirebaseAuth.getInstance();
         if(mAuth.getCurrentUser()!=null) {
@@ -172,16 +234,19 @@ public class Tasks extends Fragment {
                             if (dataSnapshot.hasChildren()) {
                                 Tasks t = new Tasks();
                                 for (DataSnapshot child : dataSnapshot.getChildren()) {
-                                    t.taskides.add(child.child("email").getValue().toString());
-                                    t.tasknote.add(child.child("note").getValue().toString());
-                                    t.names.add(child.getKey().toString());
-                                    t.statuses.add(child.child("status").getValue().toString());
-                                    String startdate = child.child("startdate").getValue().toString();
-                                    String enddate = child.child("enddate").getValue().toString();
-                                    String starttime = child.child("starttime").getValue().toString();
-                                    String endtime = child.child("endtime").getValue().toString();
-                                    String time = getDates(startdate, enddate);
-                                    t.times.add(time);
+                                    if( child.child("note").getValue()!=null && child.child("email").getValue()!=null && child.child("status").getValue()!=null&&child.child("status").getValue()!=null) {
+                                        t.taskides.add(child.child("email").getValue().toString());
+                                        t.tasknote.add(child.child("note").getValue().toString());
+                                        t.names.add(child.getKey().toString());
+                                        t.statuses.add(child.child("status").getValue().toString());
+                                        String startdate = child.child("startdate").getValue().toString();
+                                        String enddate = child.child("enddate").getValue().toString();
+                                        String starttime = child.child("starttime").getValue().toString();
+                                        String endtime = child.child("endtime").getValue().toString();
+
+                                        String time = getDateAgo(startdate, starttime, child.getKey().toString(), child.child("email").getValue().toString());
+                                        t.times.add(time);
+                                    }
                                 }
                                 insertlist(rootView, t.names, t.tasknote, t.taskides, t.statuses, t.times);
                             } else {
