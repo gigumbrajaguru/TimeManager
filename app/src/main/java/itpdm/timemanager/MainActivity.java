@@ -1,19 +1,23 @@
 package itpdm.timemanager;
 
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.nfc.Tag;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout.TabGravity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html.TagHandler;
 import android.util.Log;
 import android.widget.DatePicker;
 import android.support.v4.app.Fragment;
@@ -30,7 +34,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -48,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     Button submitbtn;
@@ -150,8 +159,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onClick(View v) {
                             mDatabases.child("TaskDetails").addValueEventListener(new ValueEventListener() {
                                 @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        editor.putString("email", MainActivity.index);
+                                public void onDataChange(DataSnapshot dataSnapshot) {
                                         mDatabases.child("TaskDetails").child(MainActivity.index.split("@")[0]).child(taskname.getText().toString()).child("email").setValue(MainActivity.index);
                                         mDatabases.child("TaskDetails").child(MainActivity.index.split("@")[0]).child(taskname.getText().toString()).child("note").setValue(tasknot.getText().toString());
                                         mDatabases.child("TaskDetails").child(MainActivity.index.split("@")[0]).child(taskname.getText().toString()).child("startdate").setValue(strtdate.getText().toString());
@@ -206,7 +214,12 @@ public class MainActivity extends AppCompatActivity {
                                                 tasknote.add(child.child("note").getValue().toString());
                                                 names.add(child.getKey().toString());
                                                 statuses.add(child.child("status").getValue().toString());
-                                                times.add("time");
+                                                String startdate=child.child("startdate").getValue().toString();
+                                                String enddate=child.child("enddate").getValue().toString();
+                                                String starttime=child.child("starttime").getValue().toString();
+                                                String endtime=child.child("endtime").getValue().toString();
+                                                String time=getDates(startdate,enddate);
+                                                times.add(startdate);
                                         }
                                         ListView lists=(ListView)mView.findViewById(R.id.selectedlist);
                                         tasknames = new String[names.size()];
@@ -250,6 +263,26 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    }
+    public String getDates(String datesone,String datetwo) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy'T'HH:mm");
+        try {
+            Date dateone = sdf.parse(datesone);
+            Date datetwos = sdf.parse(datetwo);
+            Date now = new Date(System.currentTimeMillis());
+            long days = getDateDiff(dateone, datetwos, TimeUnit.DAYS);
+            if (days < 7)
+                return days + "d";
+            else
+                return days / 7 + "w";
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "ERROR";
+    }
+    private long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
+        long diffInMillies = date2.getTime() - date1.getTime();
+        return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS);
     }
 
     public void periodtaker(final TextView textchange) {
@@ -351,10 +384,6 @@ public class MainActivity extends AppCompatActivity {
                     return profile;
                 case 1:
                     Tasks tasks = new Tasks();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("index", MainActivity.index);
-                    Tasks fragobj = new Tasks();
-                    fragobj.setArguments(bundle);
                     return tasks;
                 case 2:
                     Notification noty = new Notification();
@@ -374,7 +403,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     public static class Login {
+        private static FirebaseAuth mAuth;
         public static String Login(View v, final AlertDialog dialog) {
+            mAuth = FirebaseAuth.getInstance();
             final Button btnregisters, loginbtns;
             final EditText emails, passwords;
             final DatabaseReference mDatabases;
@@ -392,10 +423,13 @@ public class MainActivity extends AppCompatActivity {
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.hasChildren()) {
                                 for (DataSnapshot child : dataSnapshot.getChildren()) {
-                                    if (child.child("password").getValue().toString().equals(passwords.getText().toString())) {
-                                        MainActivity.index = emails.getText().toString();
-                                        dialog.dismiss();
+                                    if(passwords.getText().length()>7 && emails.getText().toString().split("@")[0]!=null) {
+                                        if (child.child("password").getValue().toString().equals(passwords.getText().toString())) {
+                                            MainActivity.index = emails.getText().toString();
+                                            mAuth.signInWithEmailAndPassword(emails.getText().toString(), (passwords.getText().toString()));
+                                            dialog.dismiss();
 
+                                        }
                                     }
 
                                 }
@@ -414,18 +448,28 @@ public class MainActivity extends AppCompatActivity {
             btnregisters.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(final View v) {
+
                     mDatabases.child("UserInfo").orderByChild("userId").equalTo(emails.getText().toString()).addValueEventListener(new ValueEventListener() {
 
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             if (!dataSnapshot.hasChildren()) {
-                                mDatabases.child("UserInfo").child(emails.getText().toString().split("@")[0]);
-                                mDatabases.child("UserInfo").child(emails.getText().toString().split("@")[0]).child("email").setValue(emails.getText().toString());
-                                mDatabases.child("UserInfo").child(emails.getText().toString().split("@")[0]).child("password").setValue(passwords.getText().toString());
-                                Snackbar.make(v, "You are now registered !", Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                                MainActivity.index = emails.getText().toString();
-                            } else {
+                                if(passwords.getText().length()>7 && emails.getText().toString().split("@")[0]!=null) {
+                                    mDatabases.child("UserInfo").child(emails.getText().toString().split("@")[0]);
+                                    mDatabases.child("UserInfo").child(emails.getText().toString().split("@")[0]).child("email").setValue(emails.getText().toString());
+                                    mDatabases.child("UserInfo").child(emails.getText().toString().split("@")[0]).child("password").setValue(passwords.getText().toString());
+                                    mAuth.createUserWithEmailAndPassword(emails.getText().toString(), passwords.getText().toString());
+                                    MainActivity.index = emails.getText().toString();
+                                    mAuth.signInWithEmailAndPassword(emails.getText().toString(), passwords.getText().toString());
+                                    dialog.dismiss();
+                                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
+                                    alertDialogBuilder.setMessage("Registered and Logged into system");
+                                    AlertDialog alertDialog = alertDialogBuilder.create();
+                                    alertDialog.show();
+                                }
+                                if(mAuth.getCurrentUser()==null){
+
+                                }
                             }
                         }
 
@@ -434,6 +478,7 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
+
                 }
             });
             return MainActivity.index;
@@ -443,6 +488,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
 
 
 }

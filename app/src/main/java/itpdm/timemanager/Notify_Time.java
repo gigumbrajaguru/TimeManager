@@ -1,6 +1,8 @@
 package itpdm.timemanager;
 
 import android.app.Activity;
+import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +27,7 @@ public class Notify_Time extends ArrayAdapter<String> {
 
     public View getView(int position, View view, ViewGroup parent) {
         LayoutInflater inflater = context.getLayoutInflater();
-        View v = inflater.inflate(R.layout.task_time, null, true);
+        View v = inflater.inflate(R.layout.notify_time, null, true);
         TextView taskid =  v.findViewById(R.id.taskid);
         TextView taskname = v.findViewById(R.id.taskname);
         TextView tasktime =  v.findViewById(R.id.tasktime);
@@ -35,7 +37,7 @@ public class Notify_Time extends ArrayAdapter<String> {
         taskname.setText(notify[position]);
         tasktime.setText(notifytimes[position]);
         if(notifystatus[position]=="true") {
-            taskname.setTextColor(16);
+            taskname.setTextColor(Color.RED);
         }
         holder.setVisibility(ImageView.INVISIBLE);
         return v;

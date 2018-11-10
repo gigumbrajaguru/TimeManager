@@ -29,15 +29,20 @@ public class Notification extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.activity_notification, container, false);
-
+        this.names.add("Important event");
+        this.times.add("18minutes");
+        this.statuses.add("true");
+        this.taskides.add("critical");
+        insertlist(rootView,names,taskides,statuses,times);
         return rootView;
     }
 
-    public void insertlist(View rootView, List names, List tasknote, List taskides, List statuses, List times) {
+    public void insertlist(View rootView,List names,List taskides,List statuses,List times) {
         ListView lists = (ListView) rootView.findViewById(R.id.notifylist);
         taskname = new String[names.size()];
         status = new String[statuses.size()];
         taskid = new String[taskides.size()];
+        tasktime=new String[times.size()];
         arraymakeone = names.toArray();
         arraymaketwo = times.toArray();
         arraymakethree = statuses.toArray();
@@ -55,7 +60,6 @@ public class Notification extends Fragment {
             times.clear();
             statuses.clear();
             taskides.clear();
-            tasknote.clear();
         }
     }
 }
