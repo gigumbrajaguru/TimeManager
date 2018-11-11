@@ -91,5 +91,6 @@ public class Notification extends Fragment {
             statuses.clear();
             taskides.clear();
         }
+
     }
 }

@@ -1,5 +1,6 @@
 package itpdm.timemanager;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -8,6 +9,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -32,9 +35,7 @@ import itpdm.timemanager.MainActivity.Login;
 import static android.app.Activity.RESULT_OK;
 
 public class Profile extends Fragment {
-    private final Handler handler = new Handler();
     private FirebaseAuth mAuth;
-    SharedPreferences sharedpreferences;
     private int RESULT_LOAD_IMAGE=1;
     View rootView;
     @Override
@@ -49,6 +50,7 @@ public class Profile extends Fragment {
         final EditText pass=rootView.findViewById(R.id.pass);
         final EditText confirm=rootView.findViewById(R.id.confirmpass);
         Button update=rootView.findViewById(R.id.updateprofilebtn);
+        Button delete=rootView.findViewById(R.id.btndeleteaccount);
         update.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,6 +68,48 @@ public class Profile extends Fragment {
                 }
             }
         });
+        delete.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+                //Uncomment the below code to Set the message and title from the strings.xml file
+                builder.setMessage("Everything will wipe!!!").setTitle("Warning");
+
+                //Setting message manually and performing action on button click
+                builder.setMessage("Do you want to proceed this application ?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialogs, int id) {
+                                mDatabases.child("UserInfo").child(mAuth.getCurrentUser().getEmail().toString().split("@")[0]).removeValue();
+                                mDatabases.child("TaskDetails").child(mAuth.getCurrentUser().getEmail().toString().split("@")[0]).removeValue();
+                                mDatabases.child("notifications").child(mAuth.getCurrentUser().getEmail().toString().split("@")[0]).removeValue();
+                                mAuth.getCurrentUser().delete();
+                                AlertDialog.Builder mBuilders = new AlertDialog.Builder(getContext());
+                                View mView = getLayoutInflater().inflate(R.layout.activity_login, null);
+                                mBuilders.setView(mView);
+                                final AlertDialog dialog = mBuilders.create();
+                                Login.Login(mView, dialog);
+                                dialog.show();
+                                dialogs.cancel();
+                                dialog.setCanceledOnTouchOutside(false);
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialogs, int id) {
+                                dialogs.cancel();
+                                Toast.makeText(getContext().getApplicationContext(), "you choose no action for alertbox",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.setTitle("Warning");
+                alert.show();
+
+            }
+        }
+
+        );
         image.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
