@@ -73,10 +73,8 @@ public class Profile extends Fragment {
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
-                //Uncomment the below code to Set the message and title from the strings.xml file
                 builder.setMessage("Everything will wipe!!!").setTitle("Warning");
 
-                //Setting message manually and performing action on button click
                 builder.setMessage("Do you want to proceed this application ?")
                         .setCancelable(false)
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
