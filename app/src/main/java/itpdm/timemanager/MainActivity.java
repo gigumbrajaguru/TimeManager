@@ -127,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
                 endtime = mView.findViewById(R.id.endtime);
                 mBuilder.setView(mView);
                 final AlertDialog dialog = mBuilder.create();
-                final SharedPreferences.Editor editor = preferences.edit();
                 dialog.show();
                 strtdate.setOnClickListener(new OnClickListener() {
                     @Override
@@ -176,7 +175,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 }
-                editor.apply();
             }
 
     });
@@ -298,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
         }
                 , yr, mon, day);
         datePickerDialog.show();
-    }
+}
 
     public void timetaker(final TextView textchanges) {
         final Calendar myCalender = Calendar.getInstance();

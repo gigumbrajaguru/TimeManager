@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -46,14 +47,15 @@ public class Notification extends Fragment {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String useremail=mAuth.getCurrentUser().getEmail().toString();
                 if(dataSnapshot.hasChildren()) {
                     for(DataSnapshot child : dataSnapshot.getChildren()){
+                        if(child.child("email").getValue()!=null&&child.child("name").getValue()!=null&&child.child("time").getValue()!=null&&child.child("status").getValue()!=null) {
                             taskides.add(child.child("email").getValue().toString());
                             names.add(child.child("name").getValue().toString());
                             times.add(child.child("time").getValue().toString());
                             statuses.add(child.child("status").getValue().toString());
                             insertlist(rootView, names, taskides, statuses, times);
+                        }
                     }
                 }
             }

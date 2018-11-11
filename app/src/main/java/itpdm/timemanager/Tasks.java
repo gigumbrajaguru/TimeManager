@@ -1,6 +1,10 @@
 package itpdm.timemanager;
 
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -10,10 +14,16 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -23,6 +33,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -35,9 +46,11 @@ public class Tasks extends Fragment {
     int validate=0;
     TaskTime addList;
     String email;
+    int day,year,month;
     private FirebaseAuth mAuth;
     String[] taskname, tasktime, status,taskid;
     Object[] arraymakeone,arraymaketwo,arraymakethree,arraymaketfour;
+    private static DatabaseReference mDatabases;
     public final List<String> names = new ArrayList<String>();
     public final List<String> times = new ArrayList<String>();
     public final List<String> statuses = new ArrayList<String>();
@@ -48,7 +61,6 @@ public class Tasks extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.activity_tasks, container, false);
-
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -57,7 +69,7 @@ public class Tasks extends Fragment {
         }, 1);
         return rootView;
     }
-    public void insertlist(View rootView,List names,List tasknote,List taskides,List statuses,List times){
+    public void insertlist(final View rootView,List names,List tasknote,List taskides,List statuses,List times){
         ListView lists=(ListView)rootView.findViewById(R.id.lists);
         taskname = new String[names.size()];
         tasktime = new String[times.size()];
@@ -82,6 +94,120 @@ public class Tasks extends Fragment {
             taskides.clear();
             tasknote.clear();
         }
+        lists.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(getContext());
+                View mView = getLayoutInflater().inflate(R.layout.activity_taskupdate, null);
+                mDatabases = FirebaseDatabase.getInstance().getReference();
+                TextView textone = mView.findViewById(R.id.TextView7);
+                final EditText texttwo=mView.findViewById(R.id.editText4);
+                final EditText textthree=mView.findViewById(R.id.editText5);
+                final EditText textfour=mView.findViewById(R.id.editText6);
+                final EditText textfive=mView.findViewById(R.id.editText7);
+                Button btndelete=mView.findViewById(R.id.button2);
+                Button btnsubmit=mView.findViewById(R.id.button);
+                final String selected = ((TextView) view.findViewById(R.id.taskname)).getText().toString();
+                textone.setText(selected);
+                mBuilder.setView(mView);
+                final AlertDialog dialog = mBuilder.create();
+                dialog.show();
+                texttwo.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        periodtaker(texttwo);
+                    }
+                });
+                textthree.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        periodtaker(textthree);
+                    }
+                });
+                textfour.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        timetaker(textfour);
+                    }
+                });
+                textfive.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        timetaker(textfive);
+                    }
+                });
+                btnsubmit.setOnClickListener(new OnClickListener() {
+                    String outname=mAuth.getCurrentUser().getEmail().split("@")[0];
+                    @Override
+                    public void onClick(View v) {
+                        mDatabases.child("TaskDetails").orderByChild("email").equalTo(mAuth.getCurrentUser().getEmail()).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                        mDatabases.child("TaskDetails").child(outname).child(selected).child("enddate").setValue(textthree.getText().toString());
+                                        mDatabases.child("TaskDetails").child(outname).child(selected).child("endtime").setValue(textfive.getText().toString());
+                                        mDatabases.child("TaskDetails").child(outname).child(selected).child("startdate").setValue(texttwo.getText().toString());
+                                        mDatabases.child("TaskDetails").child(outname).child(selected).child("starttime").setValue(textfour.getText().toString());
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                });
+                btndelete.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final String outnames=mAuth.getCurrentUser().getEmail().split("@")[0];
+                            mDatabases.child("TaskDetails").orderByChild("email").equalTo(mAuth.getCurrentUser().getEmail()).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    mDatabases.child("TaskDetails").child(outnames).child(selected).removeValue();
+                                }
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+
+                });
+
+            }
+        });
+    }
+    public void periodtaker(final TextView textchange) {
+        Calendar c = Calendar.getInstance();
+        day = c.get(Calendar.DAY_OF_MONTH);
+        month = c.get(Calendar.MONTH);
+        year = c.get(Calendar.YEAR);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                textchange.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
+            }
+        } , year, month, day);
+        datePickerDialog.show();
+    }
+
+    public void timetaker(final TextView textchanges) {
+        final Calendar myCalender = Calendar.getInstance();
+        int hour = myCalender.get(Calendar.HOUR_OF_DAY);
+        int minute = myCalender.get(Calendar.MINUTE);
+        TimePickerDialog.OnTimeSetListener myTimeListener = new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                if (view.isShown()) {
+                    myCalender.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                    myCalender.set(Calendar.MINUTE, minute);
+                }
+            }
+        };
+        TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), android.R.style.Theme_Holo_Light_Dialog_NoActionBar, myTimeListener, hour, minute, true);
+        timePickerDialog.setTitle("Choose hour:");
+        timePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        timePickerDialog.show();
+        textchanges.setText(hour + " : " + minute);
     }
     public String getDateAgo(String datesone,String time,String name,String email) {
         String join=null;
@@ -129,7 +255,6 @@ public class Tasks extends Fragment {
                     return "After "+String.valueOf(totalday)+" days";
                 }
             }
-
         return "Errors in process";
     }
     public String timedifference(String time,String name){
@@ -171,7 +296,6 @@ public class Tasks extends Fragment {
         else{
             return "Expired";
         }
-
         return String.valueOf(outtime);
     }
 
@@ -211,10 +335,8 @@ public class Tasks extends Fragment {
                         mDatabases.child("notifications").child(mAuth.getCurrentUser().getEmail().toString().split("@")[0]).child("time").setValue(time);
                         mDatabases.child("notifications").child(mAuth.getCurrentUser().getEmail().toString().split("@")[0]).child("status").setValue(status);
                 }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
     }
@@ -263,5 +385,6 @@ public class Tasks extends Fragment {
             }
         }
     }
+
 }
 
